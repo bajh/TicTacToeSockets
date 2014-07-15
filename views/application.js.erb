@@ -11,9 +11,8 @@ $(document).ready(function(){
       $('<div>X</div>').appendTo(this);
       $(this).addClass('ex');
       $(this).parent().addClass('locked');
-      alert($(this).attr('data-box')
       //Send message to server with 
-      //socket.send($(this).dataset['box'])
+      socket.send($(this).attr('data-box'))
     }
   });
 
