@@ -1,0 +1,44 @@
+$(document).ready(function(){
+
+  //Create a new socket to connect to Faye
+  var socket = new WebSocket("ws://localhost:8081");
+
+  $('.square').click(function(){
+    if(!($(this).hasClass('ex')) 
+    && !($(this).hasClass('oh'))
+    && !($(this).parent().hasClass('locked'))
+    ){
+      $('<div>X</div>').appendTo(this);
+      $(this).addClass('ex');
+      $(this).parent().addClass('locked');
+      //Send message to server with 
+      socket.send($(this).dataset['box'])
+    }
+  });
+
+  socket.onmessage = function(message){
+    //receive number of opponent's chosen square from client
+    var serverD = JSON.parse(message.data);
+    //Server sends a JSON object structured like this:
+    //{winner: null, square: '9', side: 'ex'}
+    //{winner: 'ex', square: ' 7', side: 'oh'}
+    if(serverD.winner == null){
+      $('sq-' + serverD.square).addClass(serverD.side);
+      $(this).parent().removeClass('locked');
+    }
+    else{
+      alert(serverD.winner);
+    }
+  };
+});
+
+
+
+// Two clients join the game
+// Waiting message for first client until client two joins
+// First client plays as x, second as o
+// Server informs first client that second client has joined
+// Server gives control to first client.
+// First client clicks a space.
+// If the space does not have a class of 'x-move' or 'o-move'...
+// The browser displays an x and sends the space name to the server.
