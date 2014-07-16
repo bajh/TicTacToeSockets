@@ -1,3 +1,5 @@
+require 'pry'
+
 class Game
 
   attr_reader :players
@@ -8,8 +10,16 @@ class Game
     @spaces = (1..9).map{|id| id.to_s}.to_a
   end
 
-  def move(message)
-    
+  def move(connection, message)
+    @spaces[message.to_i - 1] = find_player_symbol(connection, message).to_s
+  end
+
+  def find_opponent(connection)
+    @players.reject{|ws| ws == connection}.values.first
+  end
+
+  def find_player_symbol(connection, message)
+    @players.select{|sym, ws| ws == connection }.keys[0]
   end
 
   def victor?
@@ -19,7 +29,7 @@ class Game
     elsif victory_paths.any?{|path| path == "ohohoh"}
       "O wins!"
     elsif @turnstaken 
-      "Cat's game!"
+      "Draw!"
     else
       nil
     end

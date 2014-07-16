@@ -18,17 +18,19 @@ $(document).ready(function(){
 
   socket.onmessage = function(message){
     //receive number of opponent's chosen square from client
-    var serverD = JSON.parse(message.data);
+    alert(JSON.parse(message.data).notification)
+    if(JSON.parse(message.data).opp_sym){alert(JSON.parse(message.data).opp_sym)}
+    //var server_data = JSON.parse(message.data);
     //Server sends a JSON object structured like this:
     //{winner: null, square: '9', side: 'ex'}
     //{winner: 'ex', square: ' 7', side: 'oh'}
-    if(serverD.winner == null){
-      $('sq-' + serverD.square).addClass(serverD.side);
-      $(this).parent().removeClass('locked');
-    }
-    else{
-      alert(serverD.winner);
-    }
+    //if(serverD.winner == null){
+    //  $('sq-' + serverD.square).addClass(serverD.side);
+    //  $(this).parent().removeClass('locked');
+    //}
+    //else{
+    //  alert(serverD.winner);
+    //}
   };
 });
 

@@ -36,6 +36,8 @@ def run(opts)
           @players.each{|client| client.send(JSON.dump(notification: "Waiting for a challenger"))}
         else
           @players << ws
+          @game.players[:ex] = @players[0]
+          @game.players[:oh] = @players[1]
           @players.each{|client| client.send(JSON.dump(notification: "Now starting the game!"))}
         end
       end
@@ -43,7 +45,11 @@ def run(opts)
         @players.reject!{|client| client == ws}.each{|client| client.send(JSON.dump(notification: "Your opponent has signed off"))}
       end
       ws.onmessage do |msg|
-        puts msg #Want to test out what I get from the client when they click a box!
+        @game.move(ws, msg.to_i)
+        @game.find_opponent(ws).send(JSON.dump(opp_sym: @game.find_player_symbol(ws, msg).to_s, opp_move: msg))
+        if message = @game.victor?
+          @players.each{|player| player.send(JSON.dump("notification"=> message))}
+        end
       end
     end
   }
