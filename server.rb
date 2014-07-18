@@ -13,6 +13,7 @@ def run(opts)
   EventMachine.run {
     @players = []
     @game = Game.new
+    @turn_schedule = nil
 
     web_app = opts[:app]
 
@@ -33,22 +34,25 @@ def run(opts)
       ws.onopen do
         if @players.empty?
           @players << ws
-          @players.each{|client| client.send(JSON.dump(notification: "Waiting for a challenger"))}
+          @players[0].send(JSON.dump(notification: "Waiting for a challenger", role_assign: 'x'))
         else
           @players << ws
-          @game.players[:ex] = @players[0]
-          @game.players[:oh] = @players[1]
-          @players.each{|client| client.send(JSON.dump(notification: "Now starting the game!"))}
+          @turn_schedule = @players.cycle
+          @turn_schedule.next
+          @players[0].send(JSON.dump(unlock: true, notification: "Now starting the game! Your move!"))
+          @players[1].send(JSON.dump(notification: "Now starting the game! Please wait for your opponent to make their move", role_assign: 'o'))
         end
       end
       ws.onclose do
-        @players.reject!{|client| client == ws}.each{|client| client.send(JSON.dump(notification: "Your opponent has signed off"))}
+        @players.each{|client| client.send(JSON.dump(notification: "Your opponent has signed off"))}
       end
       ws.onmessage do |msg|
-        @game.move(ws, msg.to_i)
-        @game.find_opponent(ws).send(JSON.dump(opp_sym: @game.find_player_symbol(ws, msg).to_s, opp_move: msg))
+        #parse the incoming string into JSON
+        msg = JSON.parse(msg)
+        @game.move(msg["role"], msg["move"].to_i)
+        @turn_schedule.next.send(JSON.dump(opp_move: msg["move"]))
         if message = @game.victor?
-          @players.each{|player| player.send(JSON.dump("notification"=> message))}
+          @players.each{|player| player.send(JSON.dump(notification: message))}
         end
       end
     end

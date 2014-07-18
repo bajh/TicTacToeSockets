@@ -1,36 +1,47 @@
 $(document).ready(function(){
 
-  //Create a new socket to connect to Faye
   var socket = new WebSocket("ws://localhost:8081");
+  var role = null;
+  var opp_role = null;
 
   $('.square').click(function(){
-    if(!($(this).hasClass('ex')) 
-    && !($(this).hasClass('oh'))
+    if(!($(this).hasClass('x')) 
+    && !($(this).hasClass('o'))
     && !($(this).parent().hasClass('locked'))
     ){
-      $('<div>X</div>').appendTo(this);
-      $(this).addClass('ex');
+      $('<div>' + role + '</div>').appendTo(this);
+      $(this).addClass(role);
       $(this).parent().addClass('locked');
       //Send message to server with 
-      socket.send($(this).attr('data-box'))
+      socket.send('{"move": "' + $(this).attr('data-box') + '", "role": "' + role + '"}')
     }
   });
 
   socket.onmessage = function(message){
     //receive number of opponent's chosen square from client
-    alert(JSON.parse(message.data).notification)
-    if(JSON.parse(message.data).opp_sym){alert(JSON.parse(message.data).opp_sym)}
-    //var server_data = JSON.parse(message.data);
-    //Server sends a JSON object structured like this:
-    //{winner: null, square: '9', side: 'ex'}
-    //{winner: 'ex', square: ' 7', side: 'oh'}
-    //if(serverD.winner == null){
-    //  $('sq-' + serverD.square).addClass(serverD.side);
-    //  $(this).parent().removeClass('locked');
-    //}
-    //else{
-    //  alert(serverD.winner);
-    //}
+    var server_data = JSON.parse(message.data)
+    if(server_data.notification){
+      alert(server_data.notification)
+    }
+    if(server_data.role_assign){
+      role = server_data.role_assign
+      if(role == "x"){
+        opp_role = "o";
+      }
+      else{
+        opp_role = "x";
+      }
+    }
+    if(server_data.unlock){
+      $(document).find("#grid").removeClass('locked');
+    }
+    if(server_data.opp_move){
+      //Add the correct symbol to the relevant div
+      var selected_box = $(document).find("[data-box=" + server_data.opp_move + "]")
+      selected_box.text(opp_role)
+      selected_box.addClass(opp_role)
+      $(document).find("#grid").removeClass('locked');
+    }
   };
 });
 
