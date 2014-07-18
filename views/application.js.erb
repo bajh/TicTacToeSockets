@@ -1,12 +1,18 @@
 $(document).ready(function(){
 
+  //open new client-side websocket
   var socket = new WebSocket("ws://localhost:8081");
-  var role = null;
-  var opp_role = null;
 
+  //Just preparing some variables that will be populated below
+  var role
+  var opp_role
+
+  //Client makes a move
   $('.square').click(function(){
+    //Ensures the selected square is not already taken
     if(!($(this).hasClass('x')) 
     && !($(this).hasClass('o'))
+    //If the server has 'locked' the playboard, it will not respond to user clicks
     && !($(this).parent().hasClass('locked'))
     ){
       $('<div>' + role + '</div>').appendTo(this);
