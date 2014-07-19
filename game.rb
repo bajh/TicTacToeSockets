@@ -1,10 +1,36 @@
 class Game
 
-  attr_reader :players
+  attr_reader :player_ids
+  attr_reader :room_id
+  attr_reader :player_socks
 
-  def initialize
+  @@games = []
+
+  def self.find_empty_game
+    @@games.detect do |game|
+      game.player_socks.length == 1
+    end
+  end
+
+  def self.find_by_pid(pid)
+    @@games.detect do |game|
+      game.player_ids.any?{ |player| player == pid }
+    end
+  end
+
+  def self.find_by_ws(ws)
+    @@games.detect do |game|
+      game.player_socks.any?{ |socket| socket == ws }
+    end
+  end
+
+  def initialize(room_id, player_id)
     @turnstaken = 0
+    @@games << self
     @spaces = (1..9).map{|id| id.to_s}.to_a
+    @player_ids = [player_ids]
+    @room_id = room_id
+    @player_socks = []
   end
 
   def move(role, move)

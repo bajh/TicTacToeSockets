@@ -4,6 +4,8 @@ require 'json'
 require 'pry'
 require 'thin'
 require 'sinatra/base'
+require 'channel'
+require 'securerandom'
 require_relative 'game'
 
 #Use only reactor-aware libraries--do not block the event loop!
@@ -11,9 +13,8 @@ require_relative 'game'
 def run(opts)
 
   EventMachine.run {
-    @players = []
-    @game = Game.new
-    @turn_schedule = nil
+    @queue = []
+    @channels = {}
 
     web_app = opts[:app]
 
@@ -32,29 +33,49 @@ def run(opts)
 
     EventMachine::WebSocket.start(:host => '0.0.0.0', :port => 8081) do |ws|
       ws.onopen do
-        if @players.empty?
-          @players << ws
-          @players[0].send(JSON.dump(notification: "Waiting for a challenger", role_assign: 'x'))
+        if @queue.empty?
+          @queue << ws
+          @queue.first.send(JSON.dump(notification: "Waiting for a challenger", role_assign: 'x'))
+          @room_id = SecureRandom.hex
+          @channel = EM::Channel.new
+          @channels[@room_id] = @channel
+          game = Game.new(@room_id, SecureRandom.hex)
+          sid = @channel.subscribe{|msg| ws.send msg}
+          game.player_socks << ws
         else
-          @players << ws
-          @turn_schedule = @players.cycle
-          @turn_schedule.next
-          @players[0].send(JSON.dump(unlock: true, notification: "Now starting the game! Your move!"))
-          @players[1].send(JSON.dump(notification: "Now starting the game! Please wait for your opponent to make their move", role_assign: 'o'))
+          @queue << ws
+          player_id = SecureRandom.hex
+          game = Game.find_empty_game
+          game.player_ids << player_id
+          game.player_socks << ws
+          sid = @channel.subscribe{|msg| ws.send msg} #This block defines how the channel responds when messages are pushed to it
+          @channel.push(JSON.dump(notification: "Now starting the game!", pid: "none"))
+          @queue[0].send(JSON.dump(unlock: true, pid: game.player_ids[0], notification: "Your move!", role_assign: 'x'))
+          @queue[1].send(JSON.dump(notification: "Please wait for your opponent to make their move", pid: game.player_ids[1], role_assign: 'o'))
+          @queue.clear
         end
       end
+
       ws.onclose do
-        @players.each{|client| client.send(JSON.dump(notification: "Your opponent has signed off"))}
+        game = Game.find_by_ws(ws)
+        channel = @channels[game.room_id]
+        channel.push(JSON.dump(notification: "Your opponent has left"))
+      #   @channel.push(JSON.dump(notification: "Now starting the game!")
+      #    @players.each{|client| client.send(JSON.dump(notification: "Your opponent has signed off"))}
       end
+
       ws.onmessage do |msg|
         #parse the incoming string into JSON
         msg = JSON.parse(msg)
-        @game.move(msg["role"], msg["move"].to_i)
-        @turn_schedule.next.send(JSON.dump(opp_move: msg["move"]))
-        if message = @game.victor?
-          @players.each{|player| player.send(JSON.dump(notification: message))}
+        game = Game.find_by_pid(msg["pid"])
+        game.move(msg["role"], msg["move"].to_i)
+        channel = @channels[game.room_id]
+        channel.push(JSON.dump({opp_move: msg["move"], pid: msg["pid"]}))
+        if message = game.victor?
+          channel.push(JSON.dump(notification: message))
         end
       end
+
     end
   }
 

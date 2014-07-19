@@ -1,11 +1,12 @@
 $(document).ready(function(){
 
   //open new client-side websocket
-  var socket = new WebSocket("ws://localhost:8081");
+  var socket = new WebSocket("ws://10.68.22.119:8081");
 
   //Just preparing some variables that will be populated below
   var role
   var opp_role
+  var pid
 
   //Client makes a move
   $('.square').click(function(){
@@ -19,36 +20,43 @@ $(document).ready(function(){
       $(this).addClass(role);
       $(this).parent().addClass('locked');
       //Send message to server with 
-      socket.send('{"move": "' + $(this).attr('data-box') + '", "role": "' + role + '"}')
+      console.log(pid)
+      socket.send('{"move": "' + $(this).attr('data-box') + '", "role": "' + role + '", ' + '"pid": "' + pid + '"}')
     }
   });
 
   socket.onmessage = function(message){
     //receive number of opponent's chosen square from client
     var server_data = JSON.parse(message.data)
-    if(server_data.notification){
-      alert(server_data.notification)
-    }
     if(server_data.role_assign){
+      pid = server_data.pid
       role = server_data.role_assign
+      alert(server_data.notification)
       if(role == "x"){
         opp_role = "o";
       }
       else{
         opp_role = "x";
       }
+      if(server_data.unlock){
+        $(document).find("#grid").removeClass('locked');
+      }
     }
-    if(server_data.unlock){
-      $(document).find("#grid").removeClass('locked');
-    }
-    if(server_data.opp_move){
-      //Add the correct symbol to the relevant div
-      var selected_box = $(document).find("[data-box=" + server_data.opp_move + "]")
-      selected_box.text(opp_role)
-      selected_box.addClass(opp_role)
-      $(document).find("#grid").removeClass('locked');
-    }
-  };
+
+    if(server_data.pid !== pid){
+      if(server_data.notification){
+        //I probably don't really want this to be an alert
+        alert(server_data.notification)
+      }
+      if(server_data.opp_move){
+        //Add the correct symbol to the relevant div
+        var selected_box = $(document).find("[data-box=" + server_data.opp_move + "]")
+        selected_box.text(opp_role)
+        selected_box.addClass(opp_role)
+        $(document).find("#grid").removeClass('locked');
+      }
+    };
+  }
 });
 
 
