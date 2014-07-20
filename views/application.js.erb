@@ -1,12 +1,18 @@
 $(document).ready(function(){
 
   //open new client-side websocket
-  var socket = new WebSocket("ws://10.68.22.119:8081");
+  var socket = new WebSocket("ws://localhost:8081");
 
   //Just preparing some variables that will be populated below
   var role
   var opp_role
   var pid
+
+  function flashNotification(text, supertext){
+    $('.notification h2').text(supertext);
+    $('.notification h3').text(text);
+    $('.notification').show().fadeOut(4500,function(){});
+  };
 
   //Client makes a move
   $('.square').click(function(){
@@ -31,7 +37,8 @@ $(document).ready(function(){
     if(server_data.role_assign){
       pid = server_data.pid
       role = server_data.role_assign
-      alert(server_data.notification)
+      //alert(server_data.notification)
+      flashNotification(server_data.notification, "Tic Tac Toe");
       if(role == "x"){
         opp_role = "o";
       }
@@ -43,20 +50,44 @@ $(document).ready(function(){
       }
     }
 
+    function resetBoard(){
+      $(".square").each(function(){$(this).removeClass("x").empty()});
+      $(".square").each(function(){$(this).removeClass("o").empty()});
+    }
+
+    if(server_data.victory){
+      flashNotification(server_data.victory);
+      $(document).find("#grid").addClass('locked');
+      $("button").show();
+      $("button").click(function(){
+        resetBoard();
+        $('#grid').removeClass('locked');
+        flashNotification("Now starting another game!")
+        socket.send('{"rematch": true, "pid": "' + pid + '"}');
+      });
+    }
+
     if(server_data.pid !== pid){
       if(server_data.notification){
-        //I probably don't really want this to be an alert
-        alert(server_data.notification)
+      flashNotification(server_data.notification);
       }
       if(server_data.opp_move){
         //Add the correct symbol to the relevant div
         var selected_box = $(document).find("[data-box=" + server_data.opp_move + "]")
-        selected_box.text(opp_role)
+
+        $('<div>' + opp_role + '</div>').appendTo(selected_box);
+
+        //selected_box.text(opp_role)
         selected_box.addClass(opp_role)
         $(document).find("#grid").removeClass('locked');
       }
+      if(server_data.rematch){
+        resetBoard();
+        flashNotification("Your opponent has challenged you to another game!")
+      }  
     };
   }
+
 });
 
 

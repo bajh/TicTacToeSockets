@@ -1,10 +1,63 @@
+*{
+  margin-left:0;
+}
+
 #grid {
   width: 624px;
   height: 624px;
 }
 
+.rematch{
+  width:400px;
+  margin: 0 auto;
+}
+
+button{
+  display:none;
+  width:400px;
+  background:rgb(140, 162, 148);
+  color:rgb(242, 242, 242);
+  border: 4px solid rgb(13,66,29);
+  padding: 10px 20px;
+  font-size:40px;
+  font-family:"Cardo";
+  font-style:italic;
+  border-radius:20px;
+  letter-spacing:-1px;
+}
+
+.notification{
+  width:100%;
+  height: 270px;
+  position: fixed;
+  top:23%;
+  background-color: rgba(13,66,29,0.9);
+  text-align:center;  
+  color:rgb(242, 242, 242);
+  z-index:100;
+}
+
+.notification h2{
+  font-family: "Abril Fatface";
+  letter-spacing: -1px;
+  font-size:70px;
+  vertical-align:middle;
+}
+
+.notification h3{
+  font-family:"Cardo";
+  font-style:italic;
+  font-size:30px;
+  vertical-align:middle;
+}
+
+.container{
+  width:624px;
+  margin: 0 auto;
+}
+
 body {
-  background: white;
+  background: rgb(242,242,242);
 }
 
 .square {
@@ -12,71 +65,69 @@ body {
   width: 200px;
   height: 200px;
   background: white;
+  vertical-align: middle;
+  text-align: center;
+  background: rgb(242,242,242);
 }
 
 .sq-1{
-  border-right: 4px solid #C4C4B5;
-  border-bottom: 4px solid #C4C4B5;
+  border-right: 4px solid rgb(13,66,29);
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-2{
-  border-bottom: 4px solid #C4C4B5;
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-3{
-  border-left: 4px solid #C4C4B5;
-  border-bottom: 4px solid #C4C4B5;
+  border-left: 4px solid rgb(13,66,29);
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-4{
-  border-right: 4px solid #C4C4B5;
-  border-bottom: 4px solid #C4C4B5;
+  border-right: 4px solid rgb(13,66,29);
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-5{
-  border-bottom: 4px solid #C4C4B5;
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-6{
-  border-left: 4px solid #C4C4B5;
-  border-bottom: 4px solid #C4C4B5;
+  border-left: 4px solid rgb(13,66,29);
+  border-bottom: 4px solid rgb(13,66,29);
 }
 
 .sq-7{
-  border-right: 4px solid #C4C4B5;
+  border-right: 4px solid rgb(13,66,29);
 }
 
 .sq-8{
-  border-right: 4px solid #C4C4B5;
+  border-right: 4px solid rgb(13,66,29);
 }
 
 .x {
-  color: black;
+  color: rgb(140, 162, 148);
   font-family: 'Permanent Marker';
   font-size: 500%;
 }
 
 .x > div {
   width:30%;
-  height:50%;
+  height:40%;
   margin: 0 auto;
   -webkit-transform:rotate(9deg);
 }
 
 .o > div {
   width:30%;
-  height:50%;
+  height:40%;
   margin: 0 auto;
   -webkit-transform:rotate(9deg);
 }
 
 .o {
-  color: black;
+  color: rgb(140, 162, 148);
   font-family: 'Permanent Marker';
   font-size: 500%;
-}
-
-.container{
-  width:800px;
-  margin: 0 auto;
 }

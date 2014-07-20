@@ -1,3 +1,5 @@
+require_relative '../config/environment.rb'
+
 class Game
 
   attr_reader :player_ids
@@ -51,11 +53,6 @@ class Game
     else
       nil
     end
-  end
-
-  def replay
-    @turnstaken = 0
-    @spaces = (1..9).map{|id| id.to_s}.to_a
   end
 
 end
