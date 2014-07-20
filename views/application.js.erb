@@ -8,10 +8,13 @@ $(document).ready(function(){
   var opp_role
   var pid
 
-  function flashNotification(text, supertext){
-    $('.notification h2').text(supertext);
-    $('.notification h3').text(text);
-    $('.notification').show().fadeOut(4500,function(){});
+  function flashNotification(text, subtext){
+    $('.notification h2').text(text);
+    $('.notification h3').text(subtext);
+    $('.notification').show().fadeOut(4500,function(){
+      $('.notification h2').empty();
+      $('.notification h3').empty();
+    });
   };
 
   //Client makes a move
@@ -38,7 +41,7 @@ $(document).ready(function(){
       pid = server_data.pid
       role = server_data.role_assign
       //alert(server_data.notification)
-      flashNotification(server_data.notification, "Tic Tac Toe");
+      flashNotification("Tic Tac Toe", server_data.notification);
       if(role == "x"){
         opp_role = "o";
       }
@@ -83,20 +86,10 @@ $(document).ready(function(){
       }
       if(server_data.rematch){
         resetBoard();
-        flashNotification("Your opponent has challenged you to another game!")
+        flashNotification("Your opponent has challenged you to another game!");
+        $('.notification h2').css("font-size","50px");
       }  
     };
   }
 
 });
-
-
-
-// Two clients join the game
-// Waiting message for first client until client two joins
-// First client plays as x, second as o
-// Server informs first client that second client has joined
-// Server gives control to first client.
-// First client clicks a space.
-// If the space does not have a class of 'x-move' or 'o-move'...
-// The browser displays an x and sends the space name to the server.

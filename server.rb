@@ -35,7 +35,7 @@ def run(opts)
       ws.onopen do
         if @queue.empty?
           @queue << ws
-          @queue.first.send(JSON.dump(notification: "Waiting for your opponent!", role_assign: 'x'))
+          @queue[0].send(JSON.dump(notification: "Waiting for your opponent!", role_assign: 'x'))
           room_id = SecureRandom.hex
           @channel = EM::Channel.new
           @channels[room_id] = @channel
